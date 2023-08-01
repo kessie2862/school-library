@@ -6,7 +6,7 @@ class Person < Nameable
 
   def initialize(name = 'Unknown', age = nil, parent_permission: true)
     super()
-    @id = generate_id
+    @id = Time.now.strftime('%Y%d%m%H%M%S%Z').to_i
     @name = name
     @age = age
     @parent_permission = parent_permission
@@ -16,13 +16,13 @@ class Person < Nameable
     of_age? || @parent_permission
   end
 
+  def correct_name
+    @name
+  end
+
   private
 
   def of_age?
     @age.to_i >= 18
-  end
-
-  def correct_name
-    @name
   end
 end
