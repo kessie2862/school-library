@@ -1,41 +1,35 @@
-require './capitalize_decorator'
-require './classroom'
-require './nameable'
-require './decorator'
-require './timmer_decorator'
-require './rental'
-require './person'
-require './teacher'
-require './student'
-require './book'
+require_relative 'capitalize_decorator'
+require_relative 'classroom'
+require_relative 'nameable'
+require_relative 'decorator'
+require_relative 'trimmer_decorator'
+require_relative 'rental'
+require_relative 'person'
+require_relative 'teacher'
+require_relative 'student'
+require_relative 'book'
 
 class App
-  def initialize(display_books = [], display_people = [])
-    @display_books = display_books
-    @display_people = display_people
+  def initialize
+    @books = []
+    @people = {}
   end
 
   def list_books
-    if @display_books.empty?
-      puts 'No books available'
-    else
+    puts 'No books available' if @books.empty?
+    puts
+    @books.each do |book|
+      puts "Title: #{book.title}, Author: #{book.author}"
       puts
-      @display_books.each do |book|
-        puts "Title: #{book.title}, Author: #{book.author}"
-        puts
-      end
     end
   end
 
   def list_people
-    if @display_people.empty?
-      puts 'No one has registered'
-    else
+    puts 'No one has registered' if @people.empty?
+    puts
+    @people.values.each do |person|
+      puts "[#{person.class}] ID: #{person.id}, Name: #{person.name}, Age: #{person.age}"
       puts
-      @display_people.each do |person|
-        puts "[#{person.class}] ID: #{person.id}, Name: #{person.name}, Age: #{person.age}"
-        puts
-      end
     end
   end
 
@@ -44,6 +38,7 @@ class App
     print 'Do you want to create a student (1) or a teacher (2)? (Input the number): '
     puts
     person_type = gets.chomp
+
     case person_type
     when '1'
       create_student
@@ -51,7 +46,7 @@ class App
       create_teacher
     else
       puts
-      print 'Option invalid, please try again'
+      puts 'Option invalid, please try again'
       puts
     end
   end
@@ -59,14 +54,22 @@ class App
   def create_student
     puts
     print 'Name: '
-    student_name = gets.chomp
+    name = gets.chomp
     print 'Age: '
-    student_age = gets.chomp.to_i
+    age = gets.chomp.to_i
     print 'Has parent permission? [Y/N]: '
     has_parent_permission = gets.chomp.upcase
-    parent_permission = has_parent_permission == 'Y'
-    @display_people << Student.new(student_age, nil, student_name, parent_permission: parent_permission)
-    puts
+
+    parent_permission = case has_parent_permission
+                        when 'Y' then true
+                        when 'N' then false
+                        else
+                          puts 'Option invalid, please try again'
+                          return
+                        end
+
+    student = Student.new(age, nil, name, parent_permission: parent_permission)
+    @people[student.id] = student
     puts 'Student created successfully.'
     puts
   end
@@ -74,13 +77,14 @@ class App
   def create_teacher
     puts
     print 'Name: '
-    teacher_name = gets.chomp
+    name = gets.chomp
     print 'Age: '
-    teacher_age = gets.chomp.to_i
+    age = gets.chomp.to_i
     print 'Specialization: '
-    teacher_specialization = gets.chomp
-    @display_people << Teacher.new(teacher_age, teacher_specialization, teacher_name)
-    puts
+    specialization = gets.chomp
+
+    teacher = Teacher.new(age, specialization, name)
+    @people[teacher.id] = teacher
     puts 'Teacher created successfully.'
     puts
   end
@@ -88,10 +92,11 @@ class App
   def create_book
     puts
     print 'Title: '
-    book_title = gets.chomp
+    title = gets.chomp
     print 'Author: '
-    book_author = gets.chomp
-    @display_books << Book.new(book_title, book_author)
+    author = gets.chomp
+
+    @books << Book.new(title, author)
     puts
     puts 'Book created successfully.'
     puts
@@ -99,23 +104,25 @@ class App
 
   def create_rental
     puts 'Select a book from the following list by number'
-    @display_books.each_with_index do |book, index|
+    @books.each_with_index do |book, index|
       puts "#{index}) Title: #{book.title}, Author: #{book.author}"
     end
 
     book_index = gets.chomp.to_i
+
     puts 'Select a person from the following list by number/index (not id)'
     puts
-    @display_people.each_with_index do |person, index|
+    @people.values.each_with_index do |person, index|
       puts "#{index}) [#{person.class}] ID: #{person.id}, Name: #{person.name}, Age: #{person.age}"
     end
 
     person_index = gets.chomp.to_i
+
     print 'Date: '
     rental_date = gets.chomp
 
-    if valid_person_and_book?(person_index, book_index)
-      Rental.new(rental_date, @display_people[person_index], @display_books[book_index])
+    if valid_indices?(person_index, book_index)
+      Rental.new(rental_date, @books[book_index], @people.values[person_index])
       puts 'Rental created successfully'
     else
       puts 'Invalid person or book selected.'
@@ -124,29 +131,26 @@ class App
 
   def list_rentals
     puts
-    @display_people.each do |person|
-      puts "- [#{person.class}] ID: #{person.id}, Name: #{person.name}, Age: #{person.age}"
-    end
-
     print 'ID of person: '
     person_id = gets.chomp.to_i
-    person_obj = @display_people.find { |person| person.id == person_id }
 
-    if person_obj
-      puts
-      puts 'Rentals:'
-      person_obj.rentals.each do |rental|
-        puts "Date: #{rental.date}, Book: #{rental.book.title} by #{rental.book.author}"
-      end
-      puts
-    else
-      puts 'Person not found.'
+    person_obj = @people.values.find { |person| person.id == person_id }
+
+    if person_obj.nil?
+      puts 'Person not found'
+      return
     end
+
+    puts 'Rentals:'
+    person_obj.rentals.each do |rental|
+      puts "Date: #{rental.date}, Book: #{rental.book.title} by #{rental.book.author}"
+    end
+    puts
   end
 
   private
 
-  def valid_person_and_book?(person_index, book_index)
-    person_index.between?(0, @display_people.length - 1) && book_index.between?(0, @display_books.length - 1)
+  def valid_indices?(person_index, book_index)
+    person_index >= 0 && person_index < @people.length && book_index >= 0 && book_index < @books.length
   end
 end
