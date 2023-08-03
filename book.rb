@@ -1,5 +1,7 @@
+require './rental'
+
 class Book
-  attr_accessor :title, :author, :rentals
+  attr_accessor :rentals, :title, :author
 
   def initialize(title, author)
     @title = title
@@ -7,12 +9,7 @@ class Book
     @rentals = []
   end
 
-  def add_rental(person, date)
-    rental = Rental.new(date, self, person)
-    @rentals << rental
-  end
-
-  def rented_by
-    rentals.map(&:person)
+  def add_rental(date, person)
+    Rental.new(date, person, self)
   end
 end
