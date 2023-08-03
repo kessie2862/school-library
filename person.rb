@@ -1,12 +1,15 @@
-require_relative 'nameable'
+require './trimmer_decorator'
+require './capitalize_decorator'
+require './nameable'
 
 class Person < Nameable
-  attr_accessor :name, :age
-  attr_reader :id
+  @@id_counter = 0
 
-  def initialize(name = 'Unknown', age = nil, parent_permission: true)
+  attr_accessor :id, :name, :age, :rentals
+
+  def initialize(name = 'Unknown', age, parent_permission: true)
     super()
-    @id = Time.now.strftime('%Y%d%m%H%M%S%Z').to_i
+    @id = generate_id
     @name = name
     @age = age
     @parent_permission = parent_permission
@@ -29,5 +32,9 @@ class Person < Nameable
 
   def of_age?
     @age.to_i >= 18
+  end
+
+  def generate_id
+    @@id_counter += 1
   end
 end
