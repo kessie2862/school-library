@@ -22,36 +22,32 @@ class LibraryApp
   end
 
   def choose_option(option)
-    case option
-    when '1'
-      @app.list_books
-    when '2'
-      @app.list_people
-    when '3'
-      @app.create_person
-    when '4'
-      @app.create_book
-    when '5'
-      @app.create_rental
-    when '6'
-      @app.list_rentals
-    when '7'
-      puts 'Exiting...'
-      return false
-    else
-      puts 'Invalid value!'
-    end
-    true
+    actions = {
+      '1' => -> { @app.list_books },
+      '2' => -> { @app.list_people },
+      '3' => -> { @app.create_person },
+      '4' => -> { @app.create_book },
+      '5' => -> { @app.create_rental },
+      '6' => -> { @app.list_rentals },
+      '7' => lambda {
+               puts 'Exiting...'
+               @running = false # Set the flag to false to exit the loop
+             },
+      'default' => -> { puts 'Invalid value!' }
+    }
+
+    action = actions[option] || actions['default']
+    action.call
   end
 
   def run
     puts 'Welcome to the school library App!'
-    running = true
+    @running = true
 
-    while running
+    while @running
       show_menu
       selected_option = user_option
-      running = choose_option(selected_option)
+      choose_option(selected_option)
     end
   end
 end

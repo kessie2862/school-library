@@ -3,11 +3,11 @@ require './capitalize_decorator'
 require './nameable'
 
 class Person < Nameable
-  @@id_counter = 0
+  @id_counter = 0
 
   attr_accessor :id, :name, :age, :rentals
 
-  def initialize(name = 'Unknown', age, parent_permission: true)
+  def initialize(name = 'Unknown', age = 0, parent_permission: true)
     super()
     @id = generate_id
     @name = name
@@ -35,6 +35,7 @@ class Person < Nameable
   end
 
   def generate_id
-    @@id_counter += 1
+    self.class.instance_variable_get(:@id_counter) || self.class.instance_variable_set(:@id_counter, 0)
+    self.class.instance_variable_set(:@id_counter, self.class.instance_variable_get(:@id_counter) + 1)
   end
 end
