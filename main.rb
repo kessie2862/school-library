@@ -1,41 +1,12 @@
 require './app'
 
-class SchoolLibraryApp
-  OPTIONS = {
-    '1' => :list_books,
-    '2' => :list_people,
-    '3' => :create_person,
-    '4' => :create_book,
-    '5' => :create_rental,
-    '6' => :list_rentals,
-    '7' => :exit
-  }.freeze
-
+class LibraryApp
   def initialize
     @app = App.new
-    welcome_message
+    run
   end
 
-  def welcome_message
-    puts 'Welcome to the school library App!'
-    run_options
-  end
-
-  def run_options
-    loop do
-      show_list
-      user_option = gets.chomp
-
-      if OPTIONS.key?(user_option)
-        send(OPTIONS[user_option])
-        break if user_option == '7'
-      else
-        puts 'Invalid value!'
-      end
-    end
-  end
-
-  def show_list
+  def show_menu
     puts 'Please choose an option by entering a number:'
     puts '1 - List all books'
     puts '2 - List all people'
@@ -46,33 +17,43 @@ class SchoolLibraryApp
     puts '7 - Exit'
   end
 
-  def list_books
-    @app.list_books
+  def user_option
+    gets.chomp
   end
 
-  def list_people
-    @app.list_people
+  def choose_option(option)
+    case option
+    when '1'
+      @app.list_books
+    when '2'
+      @app.list_people
+    when '3'
+      @app.create_person
+    when '4'
+      @app.create_book
+    when '5'
+      @app.create_rental
+    when '6'
+      @app.list_rentals
+    when '7'
+      puts 'Exiting...'
+      return false
+    else
+      puts 'Invalid value!'
+    end
+    true
   end
 
-  def create_person
-    @app.create_person
-  end
+  def run
+    puts 'Welcome to the school library App!'
+    running = true
 
-  def create_book
-    @app.create_book
-  end
-
-  def create_rental
-    @app.create_rental
-  end
-
-  def list_rentals
-    @app.list_rentals
-  end
-
-  def exit
-    puts 'Goodbye!'
+    while running
+      show_menu
+      selected_option = user_option
+      running = choose_option(selected_option)
+    end
   end
 end
 
-SchoolLibraryApp.new
+LibraryApp.new
