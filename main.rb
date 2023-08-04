@@ -31,7 +31,7 @@ class LibraryApp
       '6' => -> { @app.list_rentals },
       '7' => lambda {
                puts 'Exiting...'
-               @running = false # Set the flag to false to exit the loop
+               @running = false
              },
       'default' => -> { puts 'Invalid value!' }
     }
