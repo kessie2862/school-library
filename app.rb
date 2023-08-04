@@ -68,7 +68,7 @@ class App
                           return
                         end
 
-    student = Student.new(age, nil, name, parent_permission: parent_permission)
+    student = Student.new(age, name, parent_permission: parent_permission)
     @people[student.id] = student
     puts 'Student created successfully.'
     puts
