@@ -1,6 +1,6 @@
 <a name="readme-top"></a>
 
-# School-Library
+# School-Library.
 
 </div>
 
